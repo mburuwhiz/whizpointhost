@@ -10,15 +10,14 @@ app.get('/:pdfname.pdf', (req, res) => {
     const filePath = path.join(__dirname, fileName);
 
     if (getFiles().includes(fileName) && fs.existsSync(filePath)) {
-        res.contentType("application/pdf");
         return res.sendFile(filePath);
     }
-    res.status(404).send('Sorry, that PDF is not in the list or the folder! ❌');
+    res.status(404).send('That PDF is not in the list! ❌');
 });
 
 app.get('/', (req, res) => {
     const listItems = getFiles().map(file => `<li><a href="/${file}">${file}</a></li>`).join('');
-    res.send(`<h1>Document Library</h1><ul>${listItems}</ul>`);
+    res.send(`<h1>My PDF Library</h1><ul>${listItems}</ul>`);
 });
 
-app.listen(3000, () => console.log('Server running! Check it out at http://localhost:3000 🌟'));
+app.listen(3000, () => console.log('Running without heavy dependencies! http://localhost:3000 🌟'));
