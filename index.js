@@ -1,19 +1,24 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 const app = express();
 
-app.get('/:pdfname.pdf', async (req, res) => {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    const htmlPath = path.join(__dirname, 'index.html');
-    const htmlContent = fs.readFileSync(htmlPath, 'utf8');
-    await page.setContent(htmlContent);
-    const pdfBuffer = await page.pdf({ format: 'A4' });
-    await browser.close();
-    res.contentType("application/pdf");
-    res.send(pdfBuffer);
+const getFiles = () => JSON.parse(fs.readFileSync('files.json', 'utf8')).availableFiles;
+
+app.get('/:pdfname.pdf', (req, res) => {
+    const fileName = `${req.params.pdfname}.pdf`;
+    const filePath = path.join(__dirname, fileName);
+
+    if (getFiles().includes(fileName) && fs.existsSync(filePath)) {
+        res.contentType("application/pdf");
+        return res.sendFile(filePath);
+    }
+    res.status(404).send('Sorry, that PDF is not in the list or the folder! ❌');
 });
 
-app.listen(3000, () => console.log('Server running on http://localhost:3000/document.pdf 🚀'));
+app.get('/', (req, res) => {
+    const listItems = getFiles().map(file => `<li><a href="/${file}">${file}</a></li>`).join('');
+    res.send(`<h1>Document Library</h1><ul>${listItems}</ul>`);
+});
+
+app.listen(3000, () => console.log('Server running! Check it out at http://localhost:3000 🌟'));
